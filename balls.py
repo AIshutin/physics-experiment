@@ -5,13 +5,14 @@ from math import atan2
 import numpy as np
 
 parser = ArgumentParser()
-parser.add_argument('--green', default=130)
+parser.add_argument('--green', default=100)
 parser.add_argument('--red', default=260)
-parser.add_argument('--white', default=150)
+parser.add_argument('--white', default=200)
 parser.add_argument('--width', default=100)
 parser.add_argument('--height', default=100)
 parser.add_argument('--file', default=None)
 parser.add_argument('--debug', default=True)
+parser.add_argument('--k', default=1.025)
 args = parser.parse_args()
 
 GREEN_THR = args.green
@@ -21,6 +22,7 @@ HEIGHT = args.height
 FILE = args.file
 DEBUG = args.debug
 WHITE = args.white
+K = args.k
 
 if FILE is None:
     cap = cv2.VideoCapture(0)
@@ -59,7 +61,12 @@ while True:
     for y in range(0, frame.shape[0], Y_step):
         for x in range(0, frame.shape[1], X_step):
             for c in range(3):
-                if WHITE > frame[y][x][c] >= COL_THRS[c]:
+                Z =  list(frame[y][x])
+                Z.pop(c)
+                Z = max(Z)
+                if WHITE >= frame[y][x][c] >= COL_THRS[c] and Z * K < frame[y][x][c]:
+                    print(frame[y][x], c)
+                    print(Z * 2, frame[y][x][c])
                     cnts[c] += 1
                     xs[c] += x
                     ys[c] += y
